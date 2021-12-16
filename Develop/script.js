@@ -1,73 +1,51 @@
-const store = window.localStorage;
+$(document).ready(function() {
 
-const containers = $(".containers");
+    $("#currentDay").text(moment().format("dddd, MMMM Do"));
 
-const now = moment();
+    $(".saveBtn").on("click", function() {
 
-const currentTime = { text: moment().format("h:00 A"), hour: moment().hour() };
+        console.log(this);
+        var text = $(this).siblings(".description").val();
+        var time = $(this).parent().attr("id");
 
-$("#day").text(now.format("dddd, MMMM Do"));
 
-const range = (start, end, step) => {
-    return Array.from(
-        Array.from(Array(Math.ceil((end - start) / step)).keys()),
-        (x) => start + x * step
-    );
-};
+        localStorage.setItem(time, text);
+    })
 
-const hoursOfTheDay = Array.from(new Array(10)).map((v, i) => {
-    const text = moment().hour(i).format("h:00 A");
-    const hour = moment().hour(i);
-    return { text, hour };
-});
+    $("#hour9 .description").val(localStorage.getItem("hour9"));
+    $("#hour10 .description").val(localStorage.getItem("hour10"));
+    $("#hour11 .description").val(localStorage.getItem("hour11"));
+    $("#hour12 .description").val(localStorage.getItem("hour12"));
+    $("#hour13 .description").val(localStorage.getItem("hour13"));
+    $("#hour14 .description").val(localStorage.getItem("hour14"));
+    $("#hour15 .description").val(localStorage.getItem("hour15"));
+    $("#hour16 .description").val(localStorage.getItem("hour16"));
+    $("#hour17 .description").val(localStorage.getItem("hour17"));
 
-function color(time) {
-    return time.text === currentTime.text ?
-        "bg-red-300" :
-        time.hour < now ?
-        "bg-gray-300" :
-        "bg-green-200";
-}
+    function hourTracker() {
 
-hoursOfTheDay.forEach((hr) => {
-    const grid = $(
-        `<form data-name="${hr.text}" class="grid grid-cols-12  border-gray-500 "></form>.`
-    );
+        var curHour = moment().hour();
 
-    const time = $(
-        `<div class="flex items-center justify-center col-span-2 h-16">${hr.text}</div>`
-    );
 
-    const textArea = $(
-        `<textarea name="${
-        hr.text
-      }" maxLength="50" style="resize: none; overflow: hidden;" class="col-span-8 h-16 p-6 ${color(
-        hr
-      )}">${store.getItem(hr.text) || ""}</textarea>`
-    );
+        $(".time-block").each(function() {
+            var sectionHour = parseInt($(this).attr("id").split("hour")[1]);
+            console.log(sectionHour, curHour)
 
-    textArea.keydown((e) => {
-        if (e.keyCode == 13 && !e.shiftKey) {
-            e.preventDefault();
-            return false;
-        }
-    });
 
-    const saveButton = $(
-        `<button type="submit" class="col-span-2 h-16 bg-indigo-500 text-white font-bold hover:bg-indigo-400 transition duration-500 ease-in-out"><i class="fas fa-save text-xl"></i></button>`
-    );
-
-    grid.submit((e) => {
-        e.preventDefault();
-
-        const value = $(`textarea[name="${hr.text}"]`).val();
-
-        store.setItem(hr.text, value);
-    });
-
-    grid.append(time);
-    grid.append(textArea);
-    grid.append(saveButton);
-
-    containers.append(grid);
-});
+            if (sectionHour < curHour) {
+                $(this).addClass("past");
+                $(this).removeClass("future");
+                $(this).removeClass("present");
+            } else if (sectionHour === curHour) {
+                $(this).removeClass("past");
+                $(this).addClass("present");
+                $(this).removeClass("future");
+            } else {
+                $(this).removeClass("present");
+                $(this).removeClass("past");
+                $(this).addClass("future");
+            }
+        })
+    }
+    hourTracker();
+})
